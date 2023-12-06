@@ -68,39 +68,39 @@ export async function POST(request: any) {
   }
 }
 
-export async function DELETE(request: any) {
-  try {
-    const body =  await request.json() ;
-    console.log("body",body.id)
-    console.log("body",body)
-    if (!body.id) {
-      return NextResponse.json({ success: false, message: "Invalid request format" });
-    }
+// export async function DELETE(request: any) {
+//   try {
+//     const body =  await request.json() ;
+//     console.log("body",body.id)
+//     console.log("body",body)
+//     if (!body.id) {
+//       return NextResponse.json({ success: false, message: "Invalid request format" });
+//     }
 
-    const client = new MongoClient(uri);
+//     const client = new MongoClient(uri);
 
-    try {
-      await client.connect();
+//     try {
+//       await client.connect();
 
-      const database = client.db("inventory_managment_system");
-      const inventory = database.collection("inventry");
+//       const database = client.db("inventory_managment_system");
+//       const inventory = database.collection("inventry");
 
-      console.log("invent",inventory.json())
-      const result = await inventory.deleteOne({ _id: body.id });
+//       console.log("invent",inventory.json())
+//       const result = await inventory.deleteOne({ _id: body.id });
 
-      if (result.deletedCount === 1) {
-        return NextResponse.json({ success: true, deletedCount: result.deletedCount });
-      } else {
-        return NextResponse.json({ success: false, message: "Product not found or not deleted" });
-      }
-    } finally {
-      await client.close();
-    }
-  } catch (error) {
-    console.error("Error deleting product:", error);
-    return NextResponse.json({ success: false, message: "Internal server error" });
-  }
-}
+//       if (result.deletedCount === 1) {
+//         return NextResponse.json({ success: true, deletedCount: result.deletedCount });
+//       } else {
+//         return NextResponse.json({ success: false, message: "Product not found or not deleted" });
+//       }
+//     } finally {
+//       await client.close();
+//     }
+//   } catch (error) {
+//     console.error("Error deleting product:", error);
+//     return NextResponse.json({ success: false, message: "Internal server error" });
+//   }
+// }
 
 export async function PUT(request: any) {
 
@@ -130,3 +130,28 @@ const result = await inventory.updateOne(filter,updateDoc);
     await client.close();
   }
 }
+
+export async function DELETE(request: any) {
+
+  const {id} = await request.json();
+ 
+
+  const client = new MongoClient(uri);
+
+  try {
+
+    const database = client.db("inventory_managment_system");
+    const inventory = database.collection("inventry");
+
+
+const result = await inventory.deleteOne({"_id": new ObjectId(id) });
+
+console.log(result)
+    return NextResponse.json({success: true ,message:`delted from database successfully `});
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
+
+
