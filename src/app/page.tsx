@@ -14,28 +14,23 @@ type Product = {
   quantity: number;
   _id?: string;
 };
-interface AddProductProps {
-  getProductList: () => Promise<void>;
-}
+
 const Home: React.FC = () => {
-  const [querySearch, setQuerySearch] = useState<string>("");
+  const [loading, setloading] = useState<boolean>(false)
+
   const [productForm, setProductForm] = useState<Product>({
     "product-slug": "",
     price: 0,
     quantity: 1,
     date: new Date().toISOString().split("T")[0],
   });
-  const [editForm, seteditForm] = useState<Product>({
-    "product-slug": "",
-    price: 0,
-    quantity: 1,
-    date: new Date().toISOString().split("T")[0],
-  });
+
   const [productList, setProductList] = useState<Product[]>([]);
 
 
 
   const getProductList = async () => {
+    setloading(true)
     try {
       const response = await fetch("/api/products");
       if (response.ok) {
@@ -46,81 +41,15 @@ const Home: React.FC = () => {
     } catch (error) {
       console.error("Error fetching products:", error);
     }
+    setloading(false)
+
   };
 
   useEffect(() => {
     getProductList();
   }, []);
 
-  const addProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await fetch("/api/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(productForm),
-      });
-      if (response.ok) {
-        getProductList();
-        setProductForm({
-          "product-slug": "",
-          price: 0,
-          quantity: 1,
-          date: new Date().toISOString().split("T")[0],
-        });
-        console.log("Product added successfully");
-      } else {
-        console.log("Product add unsuccessful");
-      }
-    } catch (error) {
-      console.error("Error adding product:", error);
-    }
-  };
 
-  const onChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    const formattedValue =
-      e.target.type === "date"
-        ? new Date(value).toISOString().split("T")[0]
-        : value;
-    setProductForm({ ...productForm, [name]: formattedValue });
-  };
-
- 
-
-  
-  const editBtn = async (id: string | undefined) => {
-    // id="dssf4443"
-    console.log("Edit id==>", id);
-    const newPrice = 444;
-    const newSlug = null;
-    const newQuantity = 55;
-
-    try {
-      const response = await fetch("/api/products", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id, newPrice, newSlug, newQuantity }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-        getProductList();
-
-        console.log("Product edit successfully");
-      } else {
-        console.log("Product edit unsuccessful");
-      }
-    } catch (error) {
-      console.error("Error adding product:", error);
-    }
-  };
-
-  
 
   return (
     <>
@@ -130,7 +59,7 @@ const Home: React.FC = () => {
 
        <SearchProduct setProductList={setProductList} getProductList={getProductList} />
 
-       <DisplayProduct productList={productList} onChangeHandler={onChangeHandler} getProductList={getProductList}/>
+       <DisplayProduct productList={productList} loading={loading}  getProductList={getProductList}/>
       </div>
     </>
   );
